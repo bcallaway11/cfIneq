@@ -169,7 +169,7 @@ cfObj <- function(ate=NULL, Df1=NULL, Df2=NULL, q1=NULL, q2=NULL,
 ggcf <- function(cfObj, plotate=FALSE) {
     cmat <- data.frame(qte=cfObj$qte, qte.se=cfObj$qte.se, tau=cfObj$tau)
 
-    p <- ggplot(data=cmat, mapping=aes_string(x=tau, y=qte)) +
+    p <- ggplot(data=cmat, mapping=aes(x=tau, y=qte)) +
         geom_line() +
         geom_point() +
         geom_line(aes(x=tau, y=qte+1.96*qte.se), linetype="dashed") +

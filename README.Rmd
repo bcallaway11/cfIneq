@@ -1,0 +1,103 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# cfIneq
+
+cfIneq provides functions for computing weighting estimators with a particular focus on generating counterfactual distributions and counterfactual inequality measures.
+
+Instead of implementing particular weighting estimators, cfIneq requires the user to provide a weighting function that takes the dataset and returns a set of weights for each observation in the sample.  Providing this weighting function allows the cfIneq package to generically handle many different possible counterfactual distributions and provide inference procedures using the empirical bootstrap that accounts for the weights on each observation needing to be estimated.
+
+## Installation
+
+You can install cfIneq from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("bcallaway11/cfIneq")
+```
+
+## Examples
+
+We provide an example of several counterfactual distributions below using simulated data.  First, we will consider the case where the are two sets of binary group variables, an outcome, and one covariate.
+
+```{r}
+  n <- 1000 # number of observations
+  x <- rlnorm(n) # draw a single covariate that is log normally distributed
+```
+
+```{r}
+  ## this code just makes two groups D and R, and group membership is
+  ## correlated with x
+  b20 <- -1
+  b30 <- 0
+  b40 <- 1
+  b21 <- 1
+  b31 <- 0
+  b41 <- -1
+  denom <- 1 + exp(b20 + b21*x) + exp(b30 + b31*x) + exp(b40*b41*x)
+  p1 <- 1/denom
+  p2 <- exp(b20 + b21*x)/denom
+  p3 <- exp(b30 + b31*x)/denom
+  p4 <- exp(b40 + b41*x)/denom
+  G <- sapply(1:n, function(i) sample(1:4, size=1, prob=c(p1[i], p2[i], p3[i], p4[i])))
+  aggregate(G, by=list(G), length)
+  ## just then divide them into groups
+  D <- 1*(G==1 | G==2)
+  R <- 1*(G==1 | G==3)
+```
+
+```{r}
+  ## now some code for generating outcomes
+  Y00 <- 1 + 2*x + rnorm(n)
+  Y01 <- 0 + 5*x + rnorm(n)
+  Y10 <- 3 + x + rnorm(n)
+  Y11 <- 4 + 1.5*x + rnorm(n)
+  Y <- D*R*Y11 + D*(1-R)*Y10 + (1-D)*R*Y01 + (1-D)*(1-R)*Y00
+```
+
+```{r}
+  ## create the available dataset
+  dta <- data.frame(Y=Y, D=D, R=R, X=x)
+```
+
+The main requirement for generating counterfactuals is to build a weighting function.  Here we present a simple weighting function to get the distribution of $Y$ for individuals with $D=1$.
+
+```{r}
+  wf1 <- function(df) {
+    www <- df$D ## gets observations with D=1
+    www/mean(www) ## normalizes the weights to have mean 1 (this is good
+     ## practice but optional)
+  } ## in practice, this weighting function creates a dataset with
+  ## positive (and same) weights on all individuals with D=1 and 0
+  ## weight on observations with D=0
+```
+
+And one more simple weighting function for individuals with $D=0$:
+```{r}
+  wf1 <- function(df) {
+    www <- (1-df$D) ## gets observations with D=0
+    www/mean(www) ## normalizes the weights to have mean 1 
+  }
+```
+
+Now, we will get the difference between these distributions
+```{r}
+  counterfactual(outcome=Y, wfun1=wf1, wfun2=wf2, data=dta)
+```
+
+
+
+```{r example}
+## basic example code
+```

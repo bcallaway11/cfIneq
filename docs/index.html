@@ -18,7 +18,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -55,15 +55,56 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-    <div id="cfineq" class="section level1">
+  <div class="col-md-9 contents">
+    
+
+    
+    
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+<div id="cfineq" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#cfineq" class="anchor"></a>cfIneq</h1></div>
-<p>Re-weighting Methods for Computing Counterfactual Inequality Measures</p>
+<p>cfIneq provides functions for computing weighting estimators with a particular focus on generating counterfactual distributions and counterfactual inequality measures.</p>
+<p>Instead of implementing particular weighting estimators, cfIneq requires the user to provide a weighting function that takes the dataset and returns a set of weights for each observation in the sample. Providing this weighting function allows the cfIneq package to generically handle many different possible counterfactual distributions and provide inference procedures using the empirical bootstrap that accounts for the weights on each observation needing to be estimated.</p>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p>You can install cfIneq from github with:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages("devtools")</span>
+devtools::<span class="kw">install_github</span>(<span class="st">"bcallaway11/cfIneq"</span>)</code></pre></div>
+</div>
+<div id="examples" class="section level2">
+<h2 class="hasAnchor">
+<a href="#examples" class="anchor"></a>Examples</h2>
+<p>We provide an example of several counterfactual distributions below using simulated data. First, we will consider the case where the are two sets of binary group variables, an outcome, and one covariate.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  n &lt;-<span class="st"> </span><span class="dv">1000</span> <span class="co"># number of observations</span>
+  x &lt;-<span class="st"> </span><span class="kw">rlnorm</span>(n) <span class="co"># draw a single covariate that is log normally distributed</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  b20 &lt;-<span class="st"> </span>-<span class="dv">1</span>
+  b30 &lt;-<span class="st"> </span><span class="dv">0</span>
+  b40 &lt;-<span class="st"> </span><span class="dv">1</span>
+  b21 &lt;-<span class="st"> </span><span class="dv">1</span>
+  b31 &lt;-<span class="st"> </span><span class="dv">0</span>
+  b41 &lt;-<span class="st"> </span>-<span class="dv">1</span>
+  denom &lt;-<span class="st"> </span><span class="dv">1</span> +<span class="st"> </span><span class="kw">exp</span>(b20 +<span class="st"> </span>b21*x) +<span class="st"> </span><span class="kw">exp</span>(b30 +<span class="st"> </span>b31*x) +<span class="st"> </span><span class="kw">exp</span>(b40*b41*x)
+  p1 &lt;-<span class="st"> </span><span class="dv">1</span>/denom
+  p2 &lt;-<span class="st"> </span><span class="kw">exp</span>(b20 +<span class="st"> </span>b21*x)/denom
+  p3 &lt;-<span class="st"> </span><span class="kw">exp</span>(b30 +<span class="st"> </span>b31*x)/denom
+  p4 &lt;-<span class="st"> </span><span class="kw">exp</span>(b40 +<span class="st"> </span>b41*x)/denom
+  G &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:n, function(i) <span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">4</span>, <span class="dt">size=</span><span class="dv">1</span>, <span class="dt">prob=</span><span class="kw">c</span>(p1[i], p2[i], p3[i], p4[i])))
+  <span class="kw">aggregate</span>(G, <span class="dt">by=</span><span class="kw">list</span>(G), length)
+<span class="co">#&gt;   Group.1   x</span>
+<span class="co">#&gt; 1       1 210</span>
+<span class="co">#&gt; 2       2 343</span>
+<span class="co">#&gt; 3       3 206</span>
+<span class="co">#&gt; 4       4 241</span>
+  ## just then divide them into groups
+  ## and then can calculate some interesting counterfactuals</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## basic example code</code></pre></div>
+</div>
 </div>
   </div>
 
-  <div class="col-md-3" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
@@ -84,7 +125,8 @@
 </ul>
 </div>
 
-  </div>
+      </div>
+
 </div>
 
 
