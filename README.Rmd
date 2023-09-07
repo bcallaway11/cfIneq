@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  github_document:
+    code_folding: hide
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -22,7 +24,7 @@ Instead of implementing particular weighting estimators, cfIneq requires the use
 
 You can install cfIneq from github with:
 
-```{r gh-installation, eval = FALSE}
+```{r eval=FALSE}
 # install.packages("devtools")
 devtools::install_github("bcallaway11/cfIneq")
 ```
@@ -36,7 +38,7 @@ We provide an example of several counterfactual distributions below using simula
   x <- rlnorm(n) # draw a single covariate that is log normally distributed
 ```
 
-```{r}
+```{r echo=FALSE}
   ## this code just makes two groups D and R, and group membership is
   ## correlated with x
   b20 <- -1
@@ -51,13 +53,13 @@ We provide an example of several counterfactual distributions below using simula
   p3 <- exp(b30 + b31*x)/denom
   p4 <- exp(b40 + b41*x)/denom
   G <- sapply(1:n, function(i) sample(1:4, size=1, prob=c(p1[i], p2[i], p3[i], p4[i])))
-  aggregate(G, by=list(G), length)
+  ## aggregate(G, by=list(G), length)
   ## just then divide them into groups
   D <- 1*(G==1 | G==2)
   R <- 1*(G==1 | G==3)
 ```
 
-```{r}
+```{r echo=FALSE}
   ## now some code for generating outcomes
   Y00 <- 1 + 2*x + rnorm(n)
   Y01 <- 0 + 5*x + rnorm(n)
@@ -68,6 +70,9 @@ We provide an example of several counterfactual distributions below using simula
 
 ```{r}
   ## create the available dataset
+  ## here D and R are binary variables
+  ## Y is an outcome
+  ## X is a continuous covariate (D, R, and Y are correlated with X)
   dta <- data.frame(Y=Y, D=D, R=R, X=x)
 ```
 
@@ -85,7 +90,7 @@ The main requirement for generating counterfactuals is to build a weighting func
 
 And one more simple weighting function for individuals with $D=0$:
 ```{r}
-  wf1 <- function(df) {
+  wf2 <- function(df) {
     www <- (1-df$D) ## gets observations with D=0
     www/mean(www) ## normalizes the weights to have mean 1 
   }
@@ -93,11 +98,8 @@ And one more simple weighting function for individuals with $D=0$:
 
 Now, we will get the difference between these distributions
 ```{r}
-  counterfactual(outcome=Y, wfun1=wf1, wfun2=wf2, data=dta)
+  library(cfIneq)
+  cf <- counterfactual(outcome=Y, wfun1=wf1, wfun2=wf2, data=dta)
+  ggcf(cf)
 ```
 
-
-
-```{r example}
-## basic example code
-```

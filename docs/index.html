@@ -79,27 +79,30 @@ devtools::<span class="kw">install_github</span>(<span class="st">"bcallaway11/c
 <p>We provide an example of several counterfactual distributions below using simulated data. First, we will consider the case where the are two sets of binary group variables, an outcome, and one covariate.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  n &lt;-<span class="st"> </span><span class="dv">1000</span> <span class="co"># number of observations</span>
   x &lt;-<span class="st"> </span><span class="kw">rlnorm</span>(n) <span class="co"># draw a single covariate that is log normally distributed</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  b20 &lt;-<span class="st"> </span>-<span class="dv">1</span>
-  b30 &lt;-<span class="st"> </span><span class="dv">0</span>
-  b40 &lt;-<span class="st"> </span><span class="dv">1</span>
-  b21 &lt;-<span class="st"> </span><span class="dv">1</span>
-  b31 &lt;-<span class="st"> </span><span class="dv">0</span>
-  b41 &lt;-<span class="st"> </span>-<span class="dv">1</span>
-  denom &lt;-<span class="st"> </span><span class="dv">1</span> +<span class="st"> </span><span class="kw">exp</span>(b20 +<span class="st"> </span>b21*x) +<span class="st"> </span><span class="kw">exp</span>(b30 +<span class="st"> </span>b31*x) +<span class="st"> </span><span class="kw">exp</span>(b40*b41*x)
-  p1 &lt;-<span class="st"> </span><span class="dv">1</span>/denom
-  p2 &lt;-<span class="st"> </span><span class="kw">exp</span>(b20 +<span class="st"> </span>b21*x)/denom
-  p3 &lt;-<span class="st"> </span><span class="kw">exp</span>(b30 +<span class="st"> </span>b31*x)/denom
-  p4 &lt;-<span class="st"> </span><span class="kw">exp</span>(b40 +<span class="st"> </span>b41*x)/denom
-  G &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span>:n, function(i) <span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">4</span>, <span class="dt">size=</span><span class="dv">1</span>, <span class="dt">prob=</span><span class="kw">c</span>(p1[i], p2[i], p3[i], p4[i])))
-  <span class="kw">aggregate</span>(G, <span class="dt">by=</span><span class="kw">list</span>(G), length)
-<span class="co">#&gt;   Group.1   x</span>
-<span class="co">#&gt; 1       1 210</span>
-<span class="co">#&gt; 2       2 343</span>
-<span class="co">#&gt; 3       3 206</span>
-<span class="co">#&gt; 4       4 241</span>
-  ## just then divide them into groups
-  ## and then can calculate some interesting counterfactuals</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## basic example code</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  ## create the available dataset
+  ## here D and R are binary variables
+  ## Y is an outcome
+  ## X is a continuous covariate (D, R, and Y are correlated with X)
+  dta &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">Y=</span>Y, <span class="dt">D=</span>D, <span class="dt">R=</span>R, <span class="dt">X=</span>x)</code></pre></div>
+<p>The main requirement for generating counterfactuals is to build a weighting function. Here we present a simple weighting function to get the distribution of <span class="math inline">\(Y\)</span> for individuals with <span class="math inline">\(D=1\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  wf1 &lt;-<span class="st"> </span>function(df) {
+    www &lt;-<span class="st"> </span>df$D ## gets observations with D=1
+    www/<span class="kw">mean</span>(www) ## normalizes the weights to have mean 1 (this is good
+     ## practice but optional)
+  } ## in practice, this weighting function creates a dataset with
+  ## positive (and same) weights on all individuals with D=1 and 0
+  ## weight on observations with D=0</code></pre></div>
+<p>And one more simple weighting function for individuals with <span class="math inline">\(D=0\)</span>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  wf2 &lt;-<span class="st"> </span>function(df) {
+    www &lt;-<span class="st"> </span>(<span class="dv">1</span>-df$D) ## gets observations with D=0
+    www/<span class="kw">mean</span>(www) ## normalizes the weights to have mean 1 
+  }</code></pre></div>
+<p>Now, we will get the difference between these distributions</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">  <span class="kw">library</span>(cfIneq)
+  cf &lt;-<span class="st"> </span><span class="kw"><a href="reference/counterfactual.html">counterfactual</a></span>(<span class="dt">outcome=</span>Y, <span class="dt">wfun1=</span>wf1, <span class="dt">wfun2=</span>wf2, <span class="dt">data=</span>dta)
+<span class="co">#&gt; Bootstrapping Standard Errors...</span>
+  <span class="kw"><a href="reference/ggcf.html">ggcf</a></span>(cf)</code></pre></div>
+<p><img src="README-unnamed-chunk-9-1.png" width="700"></p>
 </div>
 </div>
   </div>
